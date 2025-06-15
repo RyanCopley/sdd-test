@@ -1,8 +1,8 @@
 ---
-language: javascript
+language: html
 code_target: ./apps/simple-todo
 code_repo: https://github.com/ryancopley/sdd-test
-test_command: npm test
+test_command: echo "none"
 role: root
 ---
 
@@ -21,15 +21,8 @@ I need a basic todo list web application where users can manage their daily task
 ## Requirements
 - Web application accessible via browser
 - Simple, clean interface - no login required
-- Data should persist between sessions
+- Is just an HTML file, no backend server.
+- Just a single file output. (index.html)
+- Data should persist between sessions using localstorage
 - Should work on desktop browsers
 - Fast and responsive
-
-## Technical Preferences
-- Use Node.js for the backend
-- Simple database (SQLite is fine)
-- Modern but simple frontend (no framework needed)
-- RESTful API design
-- Standard HTTP port
-
-#include shared/basic-validation.md
