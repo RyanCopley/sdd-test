@@ -1,7 +1,7 @@
 ---
 language: javascript
 code_target: ./apps/simple-todo
-code_repo: https://github.com/your-org/implementations
+code_repo: https://github.com/ryancopley/sdd-test
 test_command: npm test
 role: root
 ---
