@@ -165,6 +165,25 @@
             text-align: center;
             color: #666;
             font-size: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .export-btn {
+            background-color: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.3s ease;
+        }
+
+        .export-btn:hover {
+            background-color: #5a67d8;
         }
 
         @media (max-width: 768px) {
@@ -187,6 +206,15 @@
             
             .todo-item {
                 padding: 12px 20px;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .export-btn {
+                margin-top: 5px;
             }
         }
     </style>
@@ -220,6 +248,7 @@
             <span id="totalTodos">0</span> total • 
             <span id="completedTodos">0</span> completed • 
             <span id="pendingTodos">0</span> pending
+            <button class="export-btn" onclick="app.exportTodos()" title="Export todos as JSON">📥 Export JSON</button>
         </div>
     </div>
 
@@ -342,6 +371,19 @@
                     console.error('Error saving todos:', error);
                     alert('Unable to save todos. Storage may be full.');
                 }
+            }
+
+            exportTodos() {
+                const dataStr = JSON.stringify(this.todos, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `todos-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
             }
         }
         
