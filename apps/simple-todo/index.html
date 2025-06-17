@@ -189,6 +189,19 @@
                 padding: 12px 20px;
             }
         }
+
+        /* Rainbow mode styles */
+        @keyframes rainbowBackground {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .rainbow-mode {
+            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #8f00ff, #ff0000) !important;
+            background-size: 400% 400% !important;
+            animation: rainbowBackground 3s ease infinite !important;
+        }
     </style>
 </head>
 <body>
@@ -233,6 +246,11 @@
                 this.emptyState = document.getElementById('emptyState');
                 this.stats = document.getElementById('stats');
                 
+                // Konami code setup
+                this.konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
+                this.userSequence = [];
+                this.rainbowMode = false;
+                
                 this.bindEvents();
                 this.render();
             }
@@ -242,6 +260,11 @@
                     if (e.key === 'Enter') {
                         this.addTodo();
                     }
+                });
+                
+                // Konami code detection
+                document.addEventListener('keydown', (e) => {
+                    this.handleKonamiInput(e);
                 });
             }
             
@@ -355,6 +378,34 @@
                 linkElement.setAttribute('href', dataUri);
                 linkElement.setAttribute('download', exportFileDefaultName);
                 linkElement.click();
+            }
+            
+            handleKonamiInput(event) {
+                const key = event.code;
+                this.userSequence.push(key);
+                
+                // Keep only the last 10 keys (length of Konami sequence)
+                if (this.userSequence.length > this.konamiSequence.length) {
+                    this.userSequence.shift();
+                }
+                
+                // Check if sequence matches
+                if (this.userSequence.length === this.konamiSequence.length) {
+                    const matches = this.userSequence.every((key, index) => key === this.konamiSequence[index]);
+                    if (matches) {
+                        this.toggleRainbowMode();
+                        this.userSequence = []; // Reset after successful activation
+                    }
+                }
+            }
+            
+            toggleRainbowMode() {
+                this.rainbowMode = !this.rainbowMode;
+                if (this.rainbowMode) {
+                    document.body.classList.add('rainbow-mode');
+                } else {
+                    document.body.classList.remove('rainbow-mode');
+                }
             }
         }
         

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Todo Tests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+        .test-pass {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .test-fail {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .test-pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #instructions {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="instructions">
+        <h2>Konami Code Test Instructions</h2>
+        <p><strong>Konami Code Sequence:</strong> ↑ ↑ ↓ ↓ ← → ← → B A</p>
+        <p>Use arrow keys, then press 'B' key, then press 'A' key</p>
+        <p>Click "Run Tests" to begin automated testing, or manually test the sequence above.</p>
+    </div>
+
+    <div class="test-container">
+        <h2>Konami Code Feature Tests</h2>
+        <button onclick="runTests()">Run Tests</button>
+        <button onclick="clearTests()">Clear Tests</button>
+        <button onclick="simulateKonamiCode()">Simulate Konami Code</button>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>Manual Test Area</h2>
+        <p>Focus this area and enter the Konami code:</p>
+        <div id="manual-test-area" tabindex="0" style="border: 2px solid #ccc; padding: 20px; background: white; min-height: 100px; outline: none;">
+            Click here and enter the Konami code sequence
+        </div>
+        <div id="sequence-display" style="margin-top: 10px; font-family: monospace;"></div>
+    </div>
+
+    <script>
+        // Mock TodoApp class for testing
+        class MockTodoApp {
+            constructor() {
+                this.konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
+                this.userSequence = [];
+                this.rainbowMode = false;
+                this.bindKonamiEvents();
+            }
+            
+            bindKonamiEvents() {
+                document.addEventListener('keydown', (e) => this.handleKonamiInput(e));
+            }
+            
+            handleKonamiInput(event) {
+                const key = event.code;
+                this.userSequence.push(key);
+                
+                // Keep only the last 10 keys (length of Konami sequence)
+                if (this.userSequence.length > this.konamiSequence.length) {
+                    this.userSequence.shift();
+                }
+                
+                // Update display
+                document.getElementById('sequence-display').textContent = 
+                    'Current sequence: ' + this.userSequence.join(' ');
+                
+                // Check if sequence matches
+                if (this.userSequence.length === this.konamiSequence.length) {
+                    const matches = this.userSequence.every((key, index) => key === this.konamiSequence[index]);
+                    if (matches) {
+                        this.toggleRainbowMode();
+                        this.userSequence = []; // Reset after successful activation
+                    }
+                }
+            }
+            
+            toggleRainbowMode() {
+                this.rainbowMode = !this.rainbowMode;
+                if (this.rainbowMode) {
+                    document.body.style.background = 'linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #8f00ff, #ff0000)';
+                    document.body.style.backgroundSize = '400% 400%';
+                    document.body.style.animation = 'rainbow 3s ease infinite';
+                } else {
+                    document.body.style.background = '#f5f5f5';
+                    document.body.style.animation = 'none';
+                }
+                
+                // Trigger custom event for testing
+                const event = new CustomEvent('rainbowModeToggled', { 
+                    detail: { active: this.rainbowMode } 
+                });
+                document.dispatchEvent(event);
+            }
+            
+            // Method to simulate the Konami code for testing
+            simulateKonamiCode() {
+                this.konamiSequence.forEach((key, index) => {
+                    setTimeout(() => {
+                        const event = new KeyboardEvent('keydown', { code: key });
+                        this.handleKonamiInput(event);
+                    }, index * 100);
+                });
+            }
+        }
+
+        // Add rainbow animation CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes rainbow {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Test framework
+        let testResults = [];
+        let app;
+
+        function addTestResult(name, passed, message) {
+            testResults.push({ name, passed, message });
+            updateTestDisplay();
+        }
+
+        function updateTestDisplay() {
+            const container = document.getElementById('test-results');
+            container.innerHTML = testResults.map(test => 
+                `<div class="test-result ${test.passed ? 'test-pass' : 'test-fail'}">
+                    ${test.passed ? '✓' : '✗'} ${test.name}: ${test.message}
+                </div>`
+            ).join('');
+        }
+
+        function clearTests() {
+            testResults = [];
+            updateTestDisplay();
+        }
+
+        function runTests() {
+            clearTests();
+            
+            // Test 1: App initialization
+            try {
+                app = new MockTodoApp();
+                addTestResult('App Initialization', true, 'TodoApp instance created successfully');
+            } catch (error) {
+                addTestResult('App Initialization', false, `Error: ${error.message}`);
+                return;
+            }
+
+            // Test 2: Konami sequence detection
+            const originalSequence = [...app.konamiSequence];
+            const expectedSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
+            const sequenceMatches = JSON.stringify(originalSequence) === JSON.stringify(expectedSequence);
+            addTestResult('Konami Sequence Correct', sequenceMatches, 
+                sequenceMatches ? 'Sequence matches expected pattern' : `Expected ${expectedSequence.join(' ')}, got ${originalSequence.join(' ')}`);
+
+            // Test 3: Rainbow mode toggle
+            const initialRainbowState = app.rainbowMode;
+            addTestResult('Initial Rainbow State', !initialRainbowState, 
+                !initialRainbowState ? 'Rainbow mode starts disabled' : 'Rainbow mode should start disabled');
+
+            // Test 4: Rainbow mode activation
+            let rainbowActivated = false;
+            document.addEventListener('rainbowModeToggled', (e) => {
+                rainbowActivated = e.detail.active;
+                addTestResult('Rainbow Mode Activation', rainbowActivated, 
+                    rainbowActivated ? 'Rainbow mode activated successfully' : 'Rainbow mode failed to activate');
+            }, { once: true });
+
+            // Simulate Konami code after a delay
+            setTimeout(() => {
+                app.simulateKonamiCode();
+                
+                // Test completion after simulation
+                setTimeout(() => {
+                    if (!rainbowActivated) {
+                        addTestResult('Rainbow Mode Activation', false, 'Rainbow mode was not activated after Konami code');
+                    }
+                }, 2000);
+            }, 500);
+        }
+
+        function simulateKonamiCode() {
+            if (app) {
+                app.simulateKonamiCode();
+            } else {
+                addTestResult('Simulate Konami', false, 'App not initialized. Run tests first.');
+            }
+        }
+
+        // Initialize app on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            app = new MockTodoApp();
+            
+            // Focus manual test area
+            document.getElementById('manual-test-area').addEventListener('focus', () => {
+                document.getElementById('sequence-display').textContent = 'Listening for Konami code...';
+            });
+        });
+    </script>
+</body>
+</html>
