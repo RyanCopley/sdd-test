@@ -18,6 +18,7 @@ I need a basic todo list web application where users can manage their daily task
 - As a user, I want to delete todos I no longer need
 - As a user, I want my todos to persist when I refresh the page
 - As a user, I want my todos to be exportable so that I can use them in other tools via a JSON export.
+- As a user, I want a secret "rainbow" mode that makes the background a rainbow if the user types in the konami code.
 
 ## Requirements
 - Web application accessible via browser
