@@ -16,6 +16,19 @@
             background-color: #f5f5f5;
             color: #333;
             line-height: 1.6;
+            transition: background 0.5s ease;
+        }
+
+        body.rainbow-mode {
+            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
+            background-size: 400% 400%;
+            animation: rainbow 3s ease infinite;
+        }
+
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .container {
@@ -233,6 +246,11 @@
                 this.emptyState = document.getElementById('emptyState');
                 this.stats = document.getElementById('stats');
                 
+                // Konami code functionality
+                this.konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
+                this.keySequence = [];
+                this.rainbowMode = false;
+                
                 this.bindEvents();
                 this.render();
             }
@@ -242,6 +260,11 @@
                     if (e.key === 'Enter') {
                         this.addTodo();
                     }
+                });
+                
+                // Konami code detection
+                document.addEventListener('keydown', (e) => {
+                    this.handleKonamiKey(e.code);
                 });
             }
             
@@ -356,6 +379,35 @@
                 linkElement.setAttribute('download', exportFileDefaultName);
                 linkElement.click();
             }
+            
+            handleKonamiKey(keyCode) {
+                this.keySequence.push(keyCode);
+                
+                // Keep only the last 10 keys to match Konami sequence length
+                if (this.keySequence.length > this.konamiSequence.length) {
+                    this.keySequence.shift();
+                }
+                
+                // Check if the sequence matches the Konami code
+                if (this.keySequence.length === this.konamiSequence.length) {
+                    const matches = this.keySequence.every((key, index) => key === this.konamiSequence[index]);
+                    if (matches) {
+                        this.toggleRainbowMode();
+                        this.keySequence = []; // Reset sequence after successful match
+                    }
+                }
+            }
+            
+            toggleRainbowMode() {
+                this.rainbowMode = !this.rainbowMode;
+                if (this.rainbowMode) {
+                    document.body.classList.add('rainbow-mode');
+                    console.log('🌈 Rainbow mode activated!');
+                } else {
+                    document.body.classList.remove('rainbow-mode');
+                    console.log('Rainbow mode deactivated');
+                }
+            }
         }
         
         // Initialize the app when the page loads
@@ -375,6 +427,36 @@
                 }
             }
         });
+
+        // Basic test functions for Konami code functionality
+        function runTests() {
+            console.log('Running Konami code tests...');
+            
+            // Test 1: Konami code sequence detection
+            console.assert(app.konamiSequence.length === 10, 'Konami sequence should have 10 keys');
+            console.assert(app.konamiSequence.join('') === 'ArrowUpArrowUpArrowDownArrowDownArrowLeftArrowRightArrowLeftArrowRightKeyBKeyA', 'Konami sequence should match expected pattern');
+            
+            // Test 2: Rainbow mode toggle
+            const initialRainbowMode = app.rainbowMode;
+            app.toggleRainbowMode();
+            console.assert(app.rainbowMode === !initialRainbowMode, 'Rainbow mode should toggle');
+            app.toggleRainbowMode(); // Reset
+            
+            // Test 3: Key sequence tracking
+            app.keySequence = [];
+            app.handleKonamiKey('ArrowUp');
+            console.assert(app.keySequence.length === 1, 'Key sequence should track keys');
+            console.assert(app.keySequence[0] === 'ArrowUp', 'Key sequence should contain correct key');
+            
+            console.log('All tests passed!');
+        }
+        
+        // Run tests after app initialization
+        setTimeout(() => {
+            if (app && typeof app.konamiSequence !== 'undefined') {
+                runTests();
+            }
+        }, 100);
     </script>
 </body>
 </html>
