@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konami Code Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .test-pass {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .test-fail {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .konami-sequence {
+            font-family: monospace;
+            background: #e9ecef;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .rainbow-bg {
+            background: linear-gradient(45deg, 
+                #ff0000, #ff8000, #ffff00, #80ff00, 
+                #00ff00, #00ff80, #00ffff, #0080ff, 
+                #0000ff, #8000ff, #ff00ff, #ff0080);
+            background-size: 400% 400%;
+            animation: rainbow-animation 3s ease infinite;
+        }
+        @keyframes rainbow-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Konami Code Test Suite</h1>
+        <p>This page tests the Konami Code functionality for the Simple Todo App.</p>
+        
+        <h2>Test Instructions:</h2>
+        <ol>
+            <li>Type the Konami Code: <span class="konami-sequence">↑ ↑ ↓ ↓ ← → ← → B A</span></li>
+            <li>Watch for the rainbow background effect</li>
+            <li>Type the code again to toggle it off</li>
+        </ol>
+        
+        <div id="test-results">
+            <h2>Test Results:</h2>
+        </div>
+        
+        <div id="current-sequence">
+            <h3>Current Input Sequence:</h3>
+            <p id="sequence-display"></p>
+        </div>
+        
+        <div id="debug-info">
+            <h3>Debug Information:</h3>
+            <ul id="debug-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Konami Code Test Suite
+        class KonamiCodeTest {
+            constructor() {
+                this.konamiCode = [
+                    'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown',
+                    'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight',
+                    'KeyB', 'KeyA'
+                ];
+                this.currentSequence = [];
+                this.isRainbowMode = false;
+                this.testResults = [];
+                
+                this.bindEvents();
+                this.runTests();
+            }
+            
+            bindEvents() {
+                document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+            }
+            
+            handleKeyDown(e) {
+                // Add to current sequence
+                this.currentSequence.push(e.code);
+                this.updateSequenceDisplay();
+                
+                // Keep only the last 10 keys (length of Konami code)
+                if (this.currentSequence.length > this.konamiCode.length) {
+                    this.currentSequence.shift();
+                }
+                
+                // Check if sequence matches Konami code
+                if (this.sequencesMatch(this.currentSequence, this.konamiCode)) {
+                    this.toggleRainbowMode();
+                    this.addDebugInfo(`Konami Code detected! Rainbow mode: ${this.isRainbowMode}`);
+                    this.currentSequence = []; // Reset sequence
+                }
+            }
+            
+            sequencesMatch(seq1, seq2) {
+                if (seq1.length !== seq2.length) return false;
+                return seq1.every((key, index) => key === seq2[index]);
+            }
+            
+            toggleRainbowMode() {
+                this.isRainbowMode = !this.isRainbowMode;
+                if (this.isRainbowMode) {
+                    document.body.classList.add('rainbow-bg');
+                } else {
+                    document.body.classList.remove('rainbow-bg');
+                }
+            }
+            
+            updateSequenceDisplay() {
+                const display = document.getElementById('sequence-display');
+                const displayKeys = this.currentSequence.map(key => {
+                    switch(key) {
+                        case 'ArrowUp': return '↑';
+                        case 'ArrowDown': return '↓';
+                        case 'ArrowLeft': return '←';
+                        case 'ArrowRight': return '→';
+                        case 'KeyB': return 'B';
+                        case 'KeyA': return 'A';
+                        default: return key;
+                    }
+                });
+                display.textContent = displayKeys.join(' ');
+            }
+            
+            addDebugInfo(message) {
+                const debugList = document.getElementById('debug-list');
+                const li = document.createElement('li');
+                li.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+                debugList.appendChild(li);
+            }
+            
+            runTests() {
+                this.testKonamiCodeArray();
+                this.testSequenceMatching();
+                this.testRainbowToggle();
+                this.displayTestResults();
+            }
+            
+            testKonamiCodeArray() {
+                const expectedLength = 10;
+                const actualLength = this.konamiCode.length;
+                
+                if (actualLength === expectedLength) {
+                    this.testResults.push({
+                        name: 'Konami Code Array Length',
+                        passed: true,
+                        message: `Correct length: ${actualLength}`
+                    });
+                } else {
+                    this.testResults.push({
+                        name: 'Konami Code Array Length',
+                        passed: false,
+                        message: `Expected ${expectedLength}, got ${actualLength}`
+                    });
+                }
+            }
+            
+            testSequenceMatching() {
+                const testSeq1 = ['KeyA', 'KeyB'];
+                const testSeq2 = ['KeyA', 'KeyB'];
+                const testSeq3 = ['KeyA', 'KeyC'];
+                
+                const match1 = this.sequencesMatch(testSeq1, testSeq2);
+                const match2 = this.sequencesMatch(testSeq1, testSeq3);
+                
+                if (match1 && !match2) {
+                    this.testResults.push({
+                        name: 'Sequence Matching Logic',
+                        passed: true,
+                        message: 'Correctly identifies matching and non-matching sequences'
+                    });
+                } else {
+                    this.testResults.push({
+                        name: 'Sequence Matching Logic',
+                        passed: false,
+                        message: `match1: ${match1}, match2: ${match2}`
+                    });
+                }
+            }
+            
+            testRainbowToggle() {
+                const initialMode = this.isRainbowMode;
+                this.toggleRainbowMode();
+                const afterToggle = this.isRainbowMode;
+                this.toggleRainbowMode(); // Reset
+                
+                if (initialMode !== afterToggle) {
+                    this.testResults.push({
+                        name: 'Rainbow Mode Toggle',
+                        passed: true,
+                        message: 'Successfully toggles rainbow mode'
+                    });
+                } else {
+                    this.testResults.push({
+                        name: 'Rainbow Mode Toggle',
+                        passed: false,
+                        message: 'Failed to toggle rainbow mode'
+                    });
+                }
+            }
+            
+            displayTestResults() {
+                const resultsContainer = document.getElementById('test-results');
+                
+                this.testResults.forEach(test => {
+                    const div = document.createElement('div');
+                    div.className = `test-result ${test.passed ? 'test-pass' : 'test-fail'}`;
+                    div.innerHTML = `
+                        <strong>${test.name}:</strong> 
+                        ${test.passed ? '✅ PASS' : '❌ FAIL'} - 
+                        ${test.message}
+                    `;
+                    resultsContainer.appendChild(div);
+                });
+                
+                const summary = document.createElement('div');
+                const passed = this.testResults.filter(t => t.passed).length;
+                const total = this.testResults.length;
+                summary.className = `test-result ${passed === total ? 'test-pass' : 'test-fail'}`;
+                summary.innerHTML = `<strong>Summary:</strong> ${passed}/${total} tests passed`;
+                resultsContainer.appendChild(summary);
+            }
+        }
+        
+        // Initialize test when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new KonamiCodeTest();
+        });
+    </script>
+</body>
+</html>
