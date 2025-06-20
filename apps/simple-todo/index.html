@@ -250,7 +250,7 @@
                 this.todoList = document.getElementById('todoList');
                 this.emptyState = document.getElementById('emptyState');
                 this.stats = document.getElementById('stats');
-                this.konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65]; // ↑↑↓↓←→←→BA
+                this.konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
                 this.konamiIndex = 0;
                 this.rainbowMode = false;
                 
@@ -404,16 +404,13 @@
             }
         }
         
-        // Initialize the app when the page loads
         let app;
         document.addEventListener('DOMContentLoaded', () => {
             app = new TodoApp();
         });
         
-        // Handle page visibility changes to sync data
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && app) {
-                // Reload todos when page becomes visible (in case changed in another tab)
                 const freshTodos = app.loadTodos();
                 if (JSON.stringify(freshTodos) !== JSON.stringify(app.todos)) {
                     app.todos = freshTodos;
