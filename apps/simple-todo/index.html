@@ -189,6 +189,24 @@
                 padding: 12px 20px;
             }
         }
+
+        .rainbow-mode {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab, #f093fb, #f5576c, #4facfe, #00f2fe);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -232,6 +250,9 @@
                 this.todoList = document.getElementById('todoList');
                 this.emptyState = document.getElementById('emptyState');
                 this.stats = document.getElementById('stats');
+                this.konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65]; // ↑↑↓↓←→←→BA
+                this.konamiIndex = 0;
+                this.rainbowMode = false;
                 
                 this.bindEvents();
                 this.render();
@@ -242,6 +263,10 @@
                     if (e.key === 'Enter') {
                         this.addTodo();
                     }
+                });
+                
+                document.addEventListener('keydown', (e) => {
+                    this.checkKonamiCode(e.keyCode);
                 });
             }
             
@@ -355,6 +380,27 @@
                 linkElement.setAttribute('href', dataUri);
                 linkElement.setAttribute('download', exportFileDefaultName);
                 linkElement.click();
+            }
+            
+            checkKonamiCode(keyCode) {
+                if (keyCode === this.konamiCode[this.konamiIndex]) {
+                    this.konamiIndex++;
+                    if (this.konamiIndex === this.konamiCode.length) {
+                        this.toggleRainbowMode();
+                        this.konamiIndex = 0;
+                    }
+                } else {
+                    this.konamiIndex = 0;
+                }
+            }
+            
+            toggleRainbowMode() {
+                this.rainbowMode = !this.rainbowMode;
+                if (this.rainbowMode) {
+                    document.body.classList.add('rainbow-mode');
+                } else {
+                    document.body.classList.remove('rainbow-mode');
+                }
             }
         }
         
